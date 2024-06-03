@@ -1,26 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { auth } from "../../lib/firebase";
 import { useChatStore } from "../../lib/chatStore";
 import { useUserStore } from "../../lib/userstore";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import "./detail.css";
 
 const Detail = () => {
   const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } = useChatStore();
   const { currentUser } = useUserStore();
+  const [db, setDb] = useState(null); // State to hold the Firestore instance
 
   useEffect(() => {
     const initializeFirestore = async () => {
-      const db = getFirestore();
-      // Now you can use `db` in your component
+      const firestore = getFirestore();
+      setDb(firestore); // Set the Firestore instance to state
     };
 
     initializeFirestore();
   }, []);
 
   const handleBlock = async () => {
-    if (!user) return;
+    if (!user || !db) return; // Ensure user and db are available
 
     const userDocRef = doc(db, "users", currentUser.id);
 
@@ -39,7 +40,7 @@ const Detail = () => {
       <div className="user">
         <img src={user?.avatar || "./avatar.png"} alt="User Avatar" />
         <h2>{user?.username}</h2>
-        <p>Lorem ipsum dolor sit amet.</p>
+        <p>Hey I'm using VpChatApp</p>
       </div>
       <div className="info">
         <div className="option">

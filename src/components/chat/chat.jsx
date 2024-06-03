@@ -1,13 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./chat.css";
 import EmojiPicker from "emoji-picker-react";
-import {
-  arrayUnion,
-  doc,
-  onSnapshot,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
+import { arrayUnion, doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "../../lib/firebase";
 import { useChatStore } from "../../lib/chatStore";
@@ -23,7 +17,7 @@ const Chat = () => {
   });
 
   const { currentUser } = useUserStore();
-  const { chatId, user ,isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
 
   const endRef = useRef(null);
 
@@ -39,6 +33,23 @@ const Chat = () => {
       unSub();
     };
   }, [chatId]);
+
+  const getTimeDifference = (timestamp) => {
+    const currentTime = new Date().getTime();
+    const messageTime = new Date(timestamp).getTime();
+    const difference = currentTime - messageTime;
+
+    // Convert difference to minutes
+    const minutes = Math.floor(difference / (1000 * 60));
+
+    if (minutes < 1) {
+      return 'just now';
+    } else if (minutes === 1) {
+      return '1 minute ago';
+    } else {
+      return `${minutes} minutes ago`;
+    }
+  };
 
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
@@ -74,7 +85,7 @@ const Chat = () => {
       const message = {
         senderId: currentUser.id,
         text,
-        createdAt: new Date(),
+        createdAt: new Date().getTime(), // Convert to Unix timestamp
         ...(imgUrl && { img: imgUrl }),
       };
 
@@ -138,7 +149,7 @@ const Chat = () => {
             <div className="texts">
               {message.img && <img src={message.img} alt="" />}
               <p>{message.text}</p>
-              <span>1 min ago</span>
+              <span>{getTimeDifference(message.createdAt)}</span>
             </div>
           </div>
         ))}
